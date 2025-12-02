@@ -1,3 +1,1106 @@
-<html>
-  test
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>土木工事現場タスク管理システム</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-blue: #1e3a8a;
+            --primary-blue-light: #3b82f6;
+            --primary-blue-dark: #1e40af;
+            --accent-orange: #f97316;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --border-color: #cbd5e1;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --danger-red: #dc2626;
+            --success-green: #16a34a;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Meiryo', 'Yu Gothic', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-dark);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-blue-dark) 100%);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 18px 24px;
+            background: var(--bg-light);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: #e2e8f0;
+            color: var(--text-dark);
+        }
+
+        .tab.active {
+            background: var(--bg-white);
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-blue);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px 40px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue-light) 0%, var(--primary-blue) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #15803d;
+        }
+
+        .btn-secondary {
+            background: var(--text-light);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--text-dark);
+        }
+
+        .table-controls {
+            margin-bottom: 20px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        }
+
+        th {
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--primary-blue);
+            border-bottom: 2px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            z-index: 10;
+        }
+
+        th.delete-col {
+            width: 80px;
+            text-align: center;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            border-right: 1px solid var(--border-color);
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8fafc;
+        }
+
+        .editable-cell {
+            min-height: 40px;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .editable-cell:hover {
+            background: #f1f5f9;
+            border-color: var(--border-color);
+        }
+
+        .editable-cell:focus {
+            outline: none;
+            background: white;
+            border-color: var(--primary-blue-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .column-item {
+            background: var(--bg-white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: move;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .column-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .column-item.dragging {
+            opacity: 0.5;
+        }
+
+        .column-item.drag-over {
+            border-color: var(--primary-blue-light);
+            background: #eff6ff;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .column-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .column-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .column-info {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-blue-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .add-column-form {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .add-column-form h3 {
+            margin-bottom: 20px;
+            color: var(--primary-blue);
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--danger-red);
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .drag-handle {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: var(--text-light);
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M9 3h2v2H9V3zm0 4h2v2H9V7zm0 4h2v2H9v-2zm0 4h2v2H9v-2zm0 4h2v2H9v-2zm4-16h2v2h-2V3zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z'/%3E%3C/svg%3E") center/contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'%3E%3Cpath d='M9 3h2v2H9V3zm0 4h2v2H9V7zm0 4h2v2H9v-2zm0 4h2v2H9v-2zm0 4h2v2H9v-2zm4-16h2v2h-2V3zm0 4h2v2h-2V7zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2zm0 4h2v2h-2v-2z'/%3E%3C/svg%3E") center/contain no-repeat;
+            cursor: grab;
+            margin-right: 12px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .preview-note {
+            background: #eff6ff;
+            border-left: 4px solid var(--primary-blue-light);
+            padding: 16px;
+            margin-bottom: 24px;
+            border-radius: 8px;
+            color: var(--text-dark);
+        }
+
+        .preview-note strong {
+            color: var(--primary-blue);
+        }
+
+        .preview-container {
+            background: var(--bg-white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .preview-container h3 {
+            color: var(--primary-blue);
+            margin-bottom: 16px;
+        }
+
+        .preview-table {
+            font-size: 13px;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 10px;
+        }
+
+        .preview-cell {
+            background: #f8fafc;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            padding: 6px;
+            min-height: 30px;
+            color: var(--text-light);
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏗️ 土木工事現場タスク管理システム</h1>
+            <p>プロトタイプ版 - 作業タスクを効率的に管理</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('tasks')">タスク表示</button>
+            <button class="tab" onclick="switchTab('settings')">表示設定</button>
+        </div>
+
+        <div id="tasks-tab" class="tab-content active">
+            <div class="table-controls">
+                <button class="btn btn-primary" onclick="addNewTask()">
+                    ➕ 新しいタスクを作成
+                </button>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="tasks-table">
+                    <thead>
+                        <tr id="table-header">
+                            <th class="delete-col">削除</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="settings-tab" class="tab-content">
+            <div class="preview-note">
+                <strong>💡 使い方:</strong> 項目を追加・編集したり、ドラッグして並び替えができます。「縦の数」を2以上にすると、その数だけ独立したセルが作成されます。
+            </div>
+
+            <div class="preview-container">
+                <h3>📋 タスク表示イメージのプレビュー</h3>
+                <div class="table-wrapper">
+                    <table class="preview-table" id="preview-table">
+                        <thead>
+                            <tr id="preview-header">
+                                <th class="delete-col">削除</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preview-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="add-column-form">
+                <h3 id="form-title">新しい項目を追加</h3>
+                <div class="form-group">
+                    <label for="column-name">項目名</label>
+                    <input type="text" id="column-name" placeholder="例: 担当会社、使用機械">
+                </div>
+                <div class="form-group">
+                    <label for="column-rows">縦の数（この項目の行数）</label>
+                    <input type="number" id="column-rows" min="1" value="1" placeholder="例: 1, 2, 3">
+                </div>
+                <div class="form-buttons">
+                    <button class="btn btn-primary" onclick="saveColumn()">保存</button>
+                    <button class="btn btn-secondary" onclick="cancelEdit()" id="cancel-btn"
+                        style="display: none;">キャンセル</button>
+                </div>
+            </div>
+
+            <div id="columns-list"></div>
+        </div>
+    </div>
+
+    <!-- 削除確認モーダル -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚠️ 削除確認</h2>
+            </div>
+            <div class="modal-body">
+                <p>このタスクを削除してもよろしいですか？</p>
+                <p>この操作は元に戻せません。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">キャンセル</button>
+                <button class="btn btn-danger" onclick="confirmDelete()">削除する</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // データ構造
+        let appData = {
+            columns: [
+                { id: 'col1', name: '担当会社', rows: 1 },
+                { id: 'col2', name: '作業内容', rows: 1 },
+                { id: 'col3', name: '使用機械', rows: 3 },
+                { id: 'col4', name: '作業期間', rows: 1 }
+            ],
+            tasks: []
+        };
+
+        let editingColumnId = null;
+        let deleteTargetId = null;
+        let nextColumnId = 5;
+        let nextTaskId = 1;
+
+        // 初期化
+        function init() {
+            loadData();
+            renderTable();
+            renderColumnsList();
+        }
+
+        // データの保存と読み込み
+        function saveData() {
+            localStorage.setItem('constructionTaskManager', JSON.stringify(appData));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem('constructionTaskManager');
+            if (saved) {
+                const loaded = JSON.parse(saved);
+                appData = loaded;
+
+                // 次のIDを更新
+                if (appData.columns.length > 0) {
+                    const maxColId = Math.max(...appData.columns.map(c => parseInt(c.id.replace('col', ''))));
+                    nextColumnId = maxColId + 1;
+                }
+                if (appData.tasks.length > 0) {
+                    const maxTaskId = Math.max(...appData.tasks.map(t => parseInt(t.id.replace('task', ''))));
+                    nextTaskId = maxTaskId + 1;
+                }
+            }
+        }
+
+        // タブ切り替え
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName + '-tab').classList.add('active');
+
+            // 表示設定タブに切り替えたらプレビューを更新
+            if (tabName === 'settings') {
+                renderPreviewTable();
+            }
+        }
+
+        // テーブルのレンダリング
+        function renderTable() {
+            renderTableHeader();
+            renderTableBody();
+        }
+
+        function renderTableHeader() {
+            const header = document.getElementById('table-header');
+            header.innerHTML = '<th class="delete-col">削除</th>';
+
+            appData.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col.name;
+                header.appendChild(th);
+            });
+        }
+
+        function renderTableBody() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+
+            if (appData.tasks.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = appData.columns.length + 1;
+                td.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📋</div>
+                        <div style="font-size: 16px;">タスクがまだありません</div>
+                        <div style="font-size: 14px; margin-top: 8px;">「新しいタスクを作成」ボタンから追加できます</div>
+                    </div>
+                `;
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+
+            appData.tasks.forEach(task => {
+                // 各列の「縦の数」から最大行数を計算
+                let maxRows = 1;
+                appData.columns.forEach(col => {
+                    maxRows = Math.max(maxRows, col.rows);
+                });
+
+                // 各行を作成
+                for (let rowIdx = 0; rowIdx < maxRows; rowIdx++) {
+                    const tr = document.createElement('tr');
+
+                    // 削除ボタン（最初の行のみ）
+                    if (rowIdx === 0) {
+                        const deleteTd = document.createElement('td');
+                        deleteTd.rowSpan = maxRows;
+                        deleteTd.style.textAlign = 'center';
+                        deleteTd.style.verticalAlign = 'middle';
+                        deleteTd.innerHTML = `<button class="btn btn-danger" onclick="showDeleteModal('${task.id}')">🗑️</button>`;
+                        tr.appendChild(deleteTd);
+                    }
+
+                    // 各列のセル
+                    appData.columns.forEach(col => {
+                        const cellData = task.data[col.id] || [];
+
+                        // この列の「縦の数」が1の場合、rowspanで1つのセルを作成
+                        if (col.rows === 1) {
+                            if (rowIdx === 0) {
+                                const td = document.createElement('td');
+                                td.rowSpan = maxRows;
+                                td.style.verticalAlign = 'top';
+
+                                const cellContent = cellData[0] || '';
+                                const div = document.createElement('div');
+                                div.className = 'editable-cell';
+                                div.contentEditable = true;
+                                div.textContent = cellContent;
+                                div.addEventListener('blur', () => saveSingleCell(task.id, col.id, 0, div.textContent));
+
+                                td.appendChild(div);
+                                tr.appendChild(td);
+                            }
+                        } else {
+                            // この列の「縦の数」が2以上の場合、各行に独立したセルを作成
+                            if (rowIdx < col.rows) {
+                                const td = document.createElement('td');
+                                td.style.verticalAlign = 'top';
+
+                                const cellContent = cellData[rowIdx] || '';
+                                const div = document.createElement('div');
+                                div.className = 'editable-cell';
+                                div.contentEditable = true;
+                                div.textContent = cellContent;
+                                div.addEventListener('blur', () => saveSingleCell(task.id, col.id, rowIdx, div.textContent));
+
+                                td.appendChild(div);
+                                tr.appendChild(td);
+                            }
+                        }
+                    });
+
+                    tbody.appendChild(tr);
+                }
+            });
+        }
+
+        // 個別セルの保存
+        function saveSingleCell(taskId, columnId, rowIndex, content) {
+            const task = appData.tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            // データ配列を初期化（存在しない場合）
+            if (!task.data[columnId]) {
+                task.data[columnId] = [];
+            }
+
+            // 指定された行のデータを更新
+            const trimmedContent = content.trim();
+            if (trimmedContent === '') {
+                // 空の場合は削除
+                task.data[columnId][rowIndex] = '';
+            } else {
+                task.data[columnId][rowIndex] = trimmedContent;
+            }
+
+            // 末尾の空要素を削除
+            while (task.data[columnId].length > 0 && task.data[columnId][task.data[columnId].length - 1] === '') {
+                task.data[columnId].pop();
+            }
+
+            saveData();
+        }
+
+        // タスクの追加
+        function addNewTask() {
+            const newTask = {
+                id: 'task' + nextTaskId++,
+                data: {}
+            };
+
+            // 各列に空配列を初期化
+            appData.columns.forEach(col => {
+                newTask.data[col.id] = [];
+            });
+
+            appData.tasks.push(newTask);
+            saveData();
+            renderTable();
+        }
+
+        // タスクの削除
+        function showDeleteModal(taskId) {
+            deleteTargetId = taskId;
+            document.getElementById('delete-modal').classList.add('active');
+        }
+
+        function closeDeleteModal() {
+            deleteTargetId = null;
+            document.getElementById('delete-modal').classList.remove('active');
+        }
+
+        function confirmDelete() {
+            if (deleteTargetId) {
+                appData.tasks = appData.tasks.filter(t => t.id !== deleteTargetId);
+                saveData();
+                renderTable();
+                closeDeleteModal();
+            }
+        }
+
+        // 列設定のレンダリング
+        function renderColumnsList() {
+            const list = document.getElementById('columns-list');
+
+            if (appData.columns.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                        <div style="font-size: 16px;">表示項目がまだありません</div>
+                        <div style="font-size: 14px; margin-top: 8px;">上のフォームから項目を追加してください</div>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = '';
+            appData.columns.forEach((col, index) => {
+                const div = document.createElement('div');
+                div.className = 'column-item';
+                div.draggable = true;
+                div.dataset.columnId = col.id;
+
+                // ヘッダー部分
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'column-header';
+
+                // 左側（ドラッグハンドルと名前）
+                const leftDiv = document.createElement('div');
+                leftDiv.style.display = 'flex';
+                leftDiv.style.alignItems = 'center';
+
+                const dragHandle = document.createElement('span');
+                dragHandle.className = 'drag-handle';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'column-name';
+                nameSpan.textContent = col.name;
+
+                leftDiv.appendChild(dragHandle);
+                leftDiv.appendChild(nameSpan);
+
+                // 右側（アクションボタン）
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'column-actions';
+
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-primary btn-sm';
+                editBtn.textContent = '✏️ 編集';
+                editBtn.addEventListener('click', () => editColumn(col.id));
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-danger btn-sm';
+                deleteBtn.textContent = '🗑️ 削除';
+                deleteBtn.addEventListener('click', () => deleteColumn(col.id));
+
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(deleteBtn);
+
+                headerDiv.appendChild(leftDiv);
+                headerDiv.appendChild(actionsDiv);
+
+                // 情報部分
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'column-info';
+                infoDiv.textContent = `縦の数: ${col.rows}行`;
+
+                div.appendChild(headerDiv);
+                div.appendChild(infoDiv);
+
+                // ドラッグイベント
+                div.addEventListener('dragstart', handleDragStart);
+                div.addEventListener('dragover', handleDragOver);
+                div.addEventListener('drop', handleDrop);
+                div.addEventListener('dragend', handleDragEnd);
+
+                list.appendChild(div);
+            });
+
+            // プレビューテーブルも更新
+            renderPreviewTable();
+        }
+
+        // ドラッグ&ドロップ
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = this;
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+
+            e.dataTransfer.dropEffect = 'move';
+
+            if (this !== draggedElement) {
+                this.classList.add('drag-over');
+            }
+
+            return false;
+        }
+
+        function handleDrop(e) {
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
+
+            this.classList.remove('drag-over');
+
+            if (draggedElement !== this) {
+                const draggedId = draggedElement.dataset.columnId;
+                const targetId = this.dataset.columnId;
+
+                const draggedIndex = appData.columns.findIndex(c => c.id === draggedId);
+                const targetIndex = appData.columns.findIndex(c => c.id === targetId);
+
+                const [removed] = appData.columns.splice(draggedIndex, 1);
+                appData.columns.splice(targetIndex, 0, removed);
+
+                saveData();
+                renderColumnsList();
+                renderTable();
+            }
+
+            return false;
+        }
+
+        function handleDragEnd(e) {
+            this.classList.remove('dragging');
+            document.querySelectorAll('.column-item').forEach(item => {
+                item.classList.remove('drag-over');
+            });
+        }
+
+        // 列の保存
+        function saveColumn() {
+            const name = document.getElementById('column-name').value.trim();
+            const rows = parseInt(document.getElementById('column-rows').value) || 1;
+
+            if (!name) {
+                alert('項目名を入力してください');
+                return;
+            }
+
+            if (editingColumnId) {
+                // 編集モード
+                const col = appData.columns.find(c => c.id === editingColumnId);
+                if (col) {
+                    col.name = name;
+                    col.rows = rows;
+                }
+                editingColumnId = null;
+            } else {
+                // 新規追加
+                const newColumn = {
+                    id: 'col' + nextColumnId++,
+                    name: name,
+                    rows: rows
+                };
+                appData.columns.push(newColumn);
+
+                // 既存タスクに新しい列を追加
+                appData.tasks.forEach(task => {
+                    task.data[newColumn.id] = [];
+                });
+            }
+
+            saveData();
+            renderColumnsList();
+            renderTable();
+            renderPreviewTable();
+            resetForm();
+        }
+
+        // 列の編集
+        function editColumn(columnId) {
+            const col = appData.columns.find(c => c.id === columnId);
+            if (!col) return;
+
+            editingColumnId = columnId;
+            document.getElementById('column-name').value = col.name;
+            document.getElementById('column-rows').value = col.rows;
+            document.getElementById('form-title').textContent = '項目を編集';
+            document.getElementById('cancel-btn').style.display = 'inline-flex';
+
+            // フォームまでスクロール
+            document.querySelector('.add-column-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // 列の削除
+        function deleteColumn(columnId) {
+            if (confirm('この項目を削除してもよろしいですか？関連するタスクデータも削除されます。')) {
+                appData.columns = appData.columns.filter(c => c.id !== columnId);
+
+                // タスクデータからも削除
+                appData.tasks.forEach(task => {
+                    delete task.data[columnId];
+                });
+
+                saveData();
+                renderColumnsList();
+                renderTable();
+            }
+        }
+
+        // 編集のキャンセル
+        function cancelEdit() {
+            editingColumnId = null;
+            resetForm();
+        }
+
+        // フォームのリセット
+        function resetForm() {
+            document.getElementById('column-name').value = '';
+            document.getElementById('column-rows').value = '1';
+            document.getElementById('form-title').textContent = '新しい項目を追加';
+            document.getElementById('cancel-btn').style.display = 'none';
+        }
+
+        // プレビューテーブルのレンダリング
+        function renderPreviewTable() {
+            const header = document.getElementById('preview-header');
+            const tbody = document.getElementById('preview-body');
+
+            // ヘッダー
+            header.innerHTML = '<th class="delete-col">削除</th>';
+            appData.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col.name;
+                header.appendChild(th);
+            });
+
+            // ボディ（サンプル行を1つ表示）
+            tbody.innerHTML = '';
+
+            if (appData.columns.length === 0) {
+                const tr = document.createElement('tr');
+                const td = document.createElement('td');
+                td.colSpan = 1;
+                td.innerHTML = '<div class="preview-cell">項目を追加すると、ここにプレビューが表示されます</div>';
+                tr.appendChild(td);
+                tbody.appendChild(tr);
+                return;
+            }
+
+            // 最大行数を計算
+            let maxRows = 1;
+            appData.columns.forEach(col => {
+                maxRows = Math.max(maxRows, col.rows);
+            });
+
+            // 各行を作成
+            for (let rowIdx = 0; rowIdx < maxRows; rowIdx++) {
+                const tr = document.createElement('tr');
+
+                // 削除ボタン列（最初の行のみ）
+                if (rowIdx === 0) {
+                    const deleteTd = document.createElement('td');
+                    deleteTd.rowSpan = maxRows;
+                    deleteTd.style.textAlign = 'center';
+                    deleteTd.style.verticalAlign = 'middle';
+                    deleteTd.innerHTML = '<div class="preview-cell">🗑️</div>';
+                    tr.appendChild(deleteTd);
+                }
+
+                // 各列のセル
+                appData.columns.forEach(col => {
+                    if (col.rows === 1) {
+                        if (rowIdx === 0) {
+                            const td = document.createElement('td');
+                            td.rowSpan = maxRows;
+                            td.style.verticalAlign = 'top';
+                            td.innerHTML = '<div class="preview-cell">データ</div>';
+                            tr.appendChild(td);
+                        }
+                    } else {
+                        if (rowIdx < col.rows) {
+                            const td = document.createElement('td');
+                            td.style.verticalAlign = 'top';
+                            td.innerHTML = `<div class="preview-cell">データ${rowIdx + 1}</div>`;
+                            tr.appendChild(td);
+                        }
+                    }
+                });
+
+                tbody.appendChild(tr);
+            }
+        }
+
+        // モーダルの外側クリックで閉じる
+        document.getElementById('delete-modal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeDeleteModal();
+            }
+        });
+
+        // 初期化実行
+        init();
+    </script>
+</body>
+
 </html>
